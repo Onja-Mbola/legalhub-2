@@ -3,7 +3,6 @@ from datetime import timedelta, datetime
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.automatisation.celery_app import celery_app
 from app.core.workflow_enums import ProcessStage
 from app.db.session import SessionLocal
 from app.models.opposition import Opposition
@@ -80,78 +79,4 @@ def update_opposition_service(
         raise HTTPException(status_code=400, detail="Échec de la mise à jour de l'opposition")
 
     return updated_opposition
-
-
-@celery_app.task()
-def check_and_send_alerts():
-    db = SessionLocal()
-    try:
-        oppositions = get_all_opposition(db)
-
-        today = datetime.utcnow().date()
-        for opposition in oppositions:
-            if not opposition.alerte_envoyee:
-                if opposition.opposition_possible_jusqua:
-                    days_left = (opposition.opposition_possible_jusqua - today).days
-                    if days_left <= 5:
-                        try:
-                            email_client = opposition.dossier.avocat_responsable_user.email
-                            dossier_info = {
-                                "nom_dossier": opposition.dossier.nom_dossier,
-                                "numero_dossier": opposition.dossier.numero_dossier,
-                                "date_notification": opposition.date_notification,
-                                "opposition_possible_jusqua": opposition.opposition_possible_jusqua,
-                                "days_left": days_left
-                            }
-
-                            send_opposition_email_programmer.delay(email=email_client, dossier=dossier_info)
-
-                            opposition.alerte_envoyee = True
-                            db.commit()
-
-                        except Exception as e:
-                            raise HTTPException(
-                                status_code=500,
-                                detail=f"Erreur lors de l'envoi du mail pour l'opposition {opposition.id} : {str(e)}"
-                            )
-    finally:
-        db.close()
-
-
-@celery_app.task()
-def check_and_send_alerts_1():
-    db = SessionLocal()
-    try:
-        oppositions = get_all_opposition(db)
-        today = datetime.utcnow().date()
-
-        for opposition in oppositions:
-            if not opposition.alerte_envoyee:
-                try:
-                    email_avocat = opposition.dossier.avocat_responsable_user.email
-                    days_left = (opposition.opposition_possible_jusqua - today).days
-                    dossier_info = {
-                        "nom_dossier": opposition.dossier.nom_dossier,
-                        "numero_dossier": opposition.dossier.numero_dossier,
-                        "date_notification": opposition.date_notification,
-                        "opposition_possible_jusqua": opposition.opposition_possible_jusqua,
-                        "days_left": days_left
-                    }
-
-                    send_opposition_email_programmer.delay(
-                        email=email_avocat,
-                        dossier=dossier_info
-                    )
-
-                    opposition.alerte_envoyee = True
-                    db.commit()
-
-                except Exception as e:
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Erreur lors de l'envoi du mail pour l'opposition {opposition.id} : {str(e)}"
-                    )
-
-    finally:
-        db.close()
 

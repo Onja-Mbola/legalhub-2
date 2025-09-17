@@ -5,7 +5,6 @@ from typing import Optional
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from app.automatisation import celery_app
 from app.core.workflow_enums import ProcessStage
 from app.repositories.jugement import create_jugement, update_jugement, get_jugements_by_dossier, get_jugement_by_id
 from app.schemas.jugement import JugementCreate, JugementUpdate

@@ -6,7 +6,6 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr
 from starlette.templating import Jinja2Templates
 
-from app.automatisation.celery_app import celery_app
 
 conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("SMTP_USERNAME"),
@@ -207,31 +206,4 @@ async def send_jugement_definitif_email(email: EmailStr, dossier):
     await fm.send_message(message)
 
 
-@celery_app.task(name="send_jugement_favorable_email_programmer")
-def send_jugement_favorable_email_programmer(email: EmailStr, dossier: dict):
-    html_content = templates.get_template("email/rappel_grosse.html").render(dossier=dossier)
 
-    message = MessageSchema(
-        subject=f"Recuperation Grosse - Dossier {dossier.get('numero_dossier', '')}",
-        recipients=[email],
-        body=html_content,
-        subtype="html"
-    )
-
-    fm = FastMail(conf)
-    asyncio.run(fm.send_message(message))
-
-
-@celery_app.task(name="send_opposition_email_programmer")
-def send_opposition_email_programmer(email: str, dossier: dict):
-    html_content = templates.get_template("email/rappel_opposition.html").render(dossier=dossier)
-
-    message = MessageSchema(
-        subject=f"Rappel Délai d'Opposition - Dossier {dossier.get('numero_dossier', '')}",
-        recipients=[email],
-        body=html_content,
-        subtype="html"
-    )
-
-    fm = FastMail(conf)
-    asyncio.run(fm.send_message(message))
