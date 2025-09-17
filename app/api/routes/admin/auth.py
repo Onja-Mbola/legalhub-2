@@ -49,7 +49,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...), d
     try:
         user = authenticate_user(email, password, db)
     except Exception as e:
-        return templates.TemplateResponse("login.html", {"request": request, "error": e.detail})
+        return templates.TemplateResponse("login.html", {"request": request, "error": str(e)})
 
     access_token = create_access_token(
         data={"sub": user.email, "role": user.role.value},
@@ -58,7 +58,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...), d
     response = RedirectResponse(url=f"/{user.role.value}/dashboard", status_code=302)
     response.set_cookie(key="access_token", value=access_token, httponly=True,
                         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60, expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                        samesite="Lax", secure=False)
+                        samesite="Lax", secure=True)
     return response
 
 @router.post("/users/", response_model=UserOut)
