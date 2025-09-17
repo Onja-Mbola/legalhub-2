@@ -15,7 +15,6 @@ from app.schemas.dossier import DossierCreate
 from app.services.action_log import log_action_service
 from app.services.dossier import create_new_dossier_with_files, get_dossiers_by_avocat_service, \
     get_dossier_by_id_service, update_dossier_with_files_service, get_dossiers_archiver_by_avocat_service
-from app.services.email import send_jugement_favorable_email_programmer
 from app.services.param_general import get_param_ordered, to_dict_list
 
 router = APIRouter()
@@ -39,10 +38,7 @@ def list_dossiers(
             "user": dossier.users.nom,
         }
 
-        send_jugement_favorable_email_programmer.apply_async(
-            args=["onjambola61@gmail.com", dossier_data],
-            countdown=60
-        )
+
 
     log_action_service(db, user.id, "Consulation Dossier", f"Affichage liste dossier", dossier_id=None)
 
@@ -69,10 +65,6 @@ def list_dossiers_archiver(
         "user": dossier.users.nom,
     }
 
-    send_jugement_favorable_email_programmer.apply_async(
-        args=["onjambola9@gmail.com", dossier_data],
-        countdown=30
-    )
 
     return templates.TemplateResponse("dossier/list_dossier_archiver.html", {
         "request": request,
