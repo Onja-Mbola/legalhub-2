@@ -13,7 +13,6 @@ from app.models.action_log import ActionLog
 from app.services.FileStorageService import save_uploaded_files
 from app.services.action_log import log_action_service
 from app.services.dossier import get_dossier_by_id_service
-from app.services.email import send_jugement_favorable_email_programmer
 from app.services.workflow_guard import WorkflowGuard
 
 
