@@ -26,7 +26,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 async def send_activation_email(email: EmailStr, token: str):
     if ENV == "production":
-        activation_link = f"https://legalhub.onrender.com/activate?token={token}"
+        activation_link = f"https://legalhub-2.onrender.com/activate?token={token}"
     else:
         activation_link = f"http://localhost:8000/activate?token={token}"
 
