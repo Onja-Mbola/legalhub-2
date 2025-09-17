@@ -10,7 +10,6 @@ from app.repositories import opposition as opposition_repo
 from app.repositories.dossier import get_dossier_by_id
 from app.repositories.opposition import get_all_opposition
 from app.schemas.opposition import OppositionCreate, OppositionUpdate, OppositionOut
-from app.services.email import send_opposition_email_programmer
 from app.services.workflow_guard import WorkflowGuard
 
 
